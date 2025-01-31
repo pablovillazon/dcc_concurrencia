@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
+#include <sstream>
 
 class ThreadPool
 {
@@ -101,19 +102,35 @@ class ThreadPool
 class Logger {
 public:
     Logger(const std::string& filename) : logFile(filename, std::ios::app) {}
+    ~Logger(){
+        flush();
+    }
     
     void log(const std::string& message) {
         auto now = std::chrono::system_clock::now();
         auto now_time_t = std::chrono::system_clock::to_time_t(now);
         auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
         
-        logFile << std::put_time(std::localtime(&now_time_t), "%Y-%m-%d %H:%M:%S")
+        std::ostringstream oss;
+        oss << std::put_time(std::localtime(&now_time_t), "%Y-%m-%d %H:%M:%S")
                 << '.' << std::setw(3) << std::setfill('0') << now_ms.count()
                 << " - " << message << std::endl;
+        messageQueue.push(oss.str());
+    }
+
+    void flush(){
+        std::lock_guard<std::mutex> lock(queueMutex);
+        while(!messageQueue.empty())
+        {
+            logFile << messageQueue.front() << std::endl;
+            messageQueue.pop();
+        }
     }
 
 private:
     std::ofstream logFile;
+    std::queue<std::string> messageQueue;
+    std::mutex queueMutex;
 };
 
 class Transaccion
@@ -146,7 +163,7 @@ class PasarelaDePagos
 
 int main()
 {
-    Logger logger("log.txt");
+    Logger logger("log_v2.txt");
     ThreadPool pool(4); //Inicializar un threadpool con 4 threads
 
     //Agregar tareas al threadpool
