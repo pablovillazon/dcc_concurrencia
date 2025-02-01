@@ -151,7 +151,7 @@ class PasarelaDePagos
             logger.log("Transaccion: " + std::to_string(transaccion.id) + "::" + std::to_string(transaccion.monto)+ "::"+ transaccion.moneda+ " RECIBIDA");
             
             //Procesar la Transaccion
-            std::this_thread::sleep_for(std::chrono::seconds(3));
+            std::this_thread::sleep_for(std::chrono::seconds(2));
             std::cout<<"Procesando la transaccion: "<<transaccion.id<<std::endl;
             
             logger.log("Transaccion: " + std::to_string(transaccion.id) + " PROCESADA");
@@ -167,33 +167,51 @@ int main()
     ThreadPool pool(4); //Inicializar un threadpool con 4 threads
 
     //Agregar tareas al threadpool
-    
-    pool.enqueue([] { std::cout<<"Tarea 1"<<std::endl; });
-    pool.enqueue([] { std::cout<<"Tarea 2"<<std::endl; });
-    pool.enqueue([] { std::cout<<"Tarea 3"<<std::endl; });
-    pool.enqueue([] { std::cout<<"Tarea 4"<<std::endl; });
-    pool.enqueue([] { std::cout<<"Tarea 5"<<std::endl; });
-    pool.enqueue([] { std::cout<<"Tarea 6"<<std::endl; });
-    pool.enqueue([] { std::cout<<"Tarea 7"<<std::endl; });
-    pool.enqueue([] { std::cout<<"Tarea 8"<<std::endl; });
-    pool.enqueue([] { std::cout<<"Tarea 9"<<std::endl; });
-    
+    /*
+    pool.enqueue([] { std::cout<<"Tarea 1"<<std::endl; });   
+    */
+
     //Procesando las transacciones
     PasarelaDePagos pasarela(logger);
+    /*
     Transaccion transaccion{1, 10.99, "USD"};
     Transaccion transaccion2{2, 10.99, "USD"};
     Transaccion transaccion3{3, 10.99, "USD"};
+    Transaccion transaccion4{4, 10.99, "USD"};
+    Transaccion transaccion5{5, 10.99, "USD"};
+    Transaccion transaccion6{6, 12.99, "USD"};
+    Transaccion transaccion7{7, 12.99, "USD"};
+    Transaccion transaccion8{8, 12.99, "USD"};
+    Transaccion transaccion9{8, 12.99, "USD"};
     //std::cout<<transaccion.moneda<<std::endl;
     auto future = pool.enqueue(&PasarelaDePagos::procesarTransaccion, &pasarela, transaccion);
     auto future2 = pool.enqueue(&PasarelaDePagos::procesarTransaccion, &pasarela, transaccion2);
     auto future3 = pool.enqueue(&PasarelaDePagos::procesarTransaccion, &pasarela, transaccion3);
+    auto future4 = pool.enqueue(&PasarelaDePagos::procesarTransaccion, &pasarela, transaccion4);
+    auto future5 = pool.enqueue(&PasarelaDePagos::procesarTransaccion, &pasarela, transaccion5);
+    auto future6 = pool.enqueue(&PasarelaDePagos::procesarTransaccion, &pasarela, transaccion6);
+    auto future7 = pool.enqueue(&PasarelaDePagos::procesarTransaccion, &pasarela, transaccion7);
+    auto future8 = pool.enqueue(&PasarelaDePagos::procesarTransaccion, &pasarela, transaccion8);
     
     future.get();
     future2.get();
-    future3.get();    
-    
+    future3.get();
+    future4.get();
+    future5.get();
+    future6.get();
+    future7.get();
+    future8.get();
+    */
+    int nroTransacciones = 10;
+    for (int i = 0; i < nroTransacciones; i++)
+    {
+        Transaccion transaccion{i+1, 10.99, "USD"};
+        auto future = pool.enqueue(&PasarelaDePagos::procesarTransaccion, &pasarela, transaccion);
+        //future.get();      
+    }
 
-    std::cout<<"la execution, ha terminado!"<<std::endl;
+    std::cout<<"la execucion esta en proceso!"<<std::endl;
     //Detener el threadpool
     pool.shutdown();
+    std::cout<<"la execucion ha terminado!"<<std::endl;
 }
