@@ -1,6 +1,7 @@
 import multiprocessing
 import time
 import random
+import json
 from datetime import datetime
 from colorama import Fore, Style, init
 
@@ -40,7 +41,6 @@ class ProcesadorPagos:
     def recibir_transaccion(self, transaccion):
         """Recibe una transacción y la envía al procesamiento asincrónico."""
         self.pool.apply_async(self.procesar_transaccion, args=(transaccion, self.lock, self.transacciones_completadas))
-        #self.pool.apply_async(self.procesar_transaccion, args=(transaccion, proceso_lock, self.transacciones_completadas))
 
     @staticmethod
     def procesar_transaccion(transaccion, lock, transacciones_completadas):
@@ -51,10 +51,9 @@ class ProcesadorPagos:
         with lock:
             print(Fore.CYAN + f"🕒 [{timestamp}] {process_name} - INICIO Procesando: {transaccion}")
 
-        time.sleep(random.uniform(1, 4))  # Simula tiempo de procesamiento        
-        
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Timestamp actual
+        time.sleep(random.uniform(1, 4))  # Simula tiempo de procesamiento
 
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Timestamp final
         transaccion.estado = "Completada"
         with lock:
             print(Fore.GREEN + f"✅ [{timestamp}] {process_name} - FINALIZADO: {transaccion}")
@@ -74,23 +73,20 @@ class ProcesadorPagos:
         print(Fore.LIGHTGREEN_EX + f"💰 TOTAL PROCESADO: {total_procesado} USD")
         print(Fore.YELLOW + "=" * 60)
 
+def cargar_transacciones_desde_json(archivo_json):
+    """Carga transacciones desde un archivo JSON."""
+    with open(archivo_json, "r") as file:
+        data = json.load(file)
+    return [Transaccion(t["id"], t["monto"], t["moneda"]) for t in data]
+
 def main():
     """Ejecuta el procesamiento concurrente de transacciones bancarias."""
     procesador_pagos = ProcesadorPagos(4)  # 4 Procesos de pago
 
     start_time = time.time()  # Iniciar el cronómetro
 
-    transacciones = [
-        Transaccion(1, 100.50, "USD"),
-        Transaccion(2, 600.25, "USD"),
-        Transaccion(3, 350.25, "USD"),
-        Transaccion(4, 268.34, "USD"),
-        Transaccion(5, 167.26, "USD"),
-        Transaccion(6, 149.50, "USD"),
-        Transaccion(7, 268.13, "USD"),
-        Transaccion(8, 245.20, "USD"),
-        Transaccion(9, 469.15, "USD"),
-    ]
+    # Cargar transacciones desde JSON
+    transacciones = cargar_transacciones_desde_json("./AppPython/transacciones_multimoneda.json")
 
     for transaccion in transacciones:
         procesador_pagos.recibir_transaccion(transaccion)
