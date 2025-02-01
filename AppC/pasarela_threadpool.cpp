@@ -105,7 +105,15 @@ public:
     ~Logger(){
         flush();
     }
-    
+    void logTimeElapsed(const std::string& activityName, std::chrono::steady_clock::time_point startTime) {
+        auto endTime = std::chrono::steady_clock::now();
+        auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+        std::ostringstream oss;
+        oss << "Tiempo transcurrido en " << activityName << ": " << timeElapsed << " ms";
+        log(oss.str());
+    }
+
+
     void log(const std::string& message) {
         auto now = std::chrono::system_clock::now();
         auto now_time_t = std::chrono::system_clock::to_time_t(now);
@@ -132,6 +140,10 @@ private:
     std::queue<std::string> messageQueue;
     std::mutex queueMutex;
 };
+
+
+
+
 
 class Transaccion
 {
@@ -164,7 +176,10 @@ class PasarelaDePagos
 int main()
 {
     Logger logger("log_v2.txt");
+    auto startTime = std::chrono::steady_clock::now();
+
     ThreadPool pool(4); //Inicializar un threadpool con 4 threads
+    
 
     //Agregar tareas al threadpool
     /*
@@ -212,6 +227,10 @@ int main()
 
     std::cout<<"la execucion esta en proceso!"<<std::endl;
     //Detener el threadpool
+    
+
     pool.shutdown();
     std::cout<<"la execucion ha terminado!"<<std::endl;
+    logger.logTimeElapsed("Procesamiento de Transacciones", startTime);
+    return 0;
 }
