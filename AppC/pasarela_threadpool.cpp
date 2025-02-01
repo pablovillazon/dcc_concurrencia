@@ -141,10 +141,6 @@ private:
     std::mutex queueMutex;
 };
 
-
-
-
-
 class Transaccion
 {
     public:
@@ -161,12 +157,14 @@ class PasarelaDePagos
         void procesarTransaccion(Transaccion transaccion)
         {                
             logger.log("Transaccion: " + std::to_string(transaccion.id) + "::" + std::to_string(transaccion.monto)+ "::"+ transaccion.moneda+ " RECIBIDA");
-            
+            auto startTime = std::chrono::steady_clock::now();
             //Procesar la Transaccion
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            int secs = rand() % 4 + 2; // 2, 3, 4 o 5
+            std::this_thread::sleep_for(std::chrono::seconds(secs));
             std::cout<<"Procesando la transaccion: "<<transaccion.id<<std::endl;
             
             logger.log("Transaccion: " + std::to_string(transaccion.id) + " PROCESADA");
+            logger.logTimeElapsed("Tiempo de la Transaccion " + std::to_string(transaccion.id) , startTime);
             
         }
     private:
