@@ -105,7 +105,15 @@ public:
     ~Logger(){
         flush();
     }
-    
+    void logTimeElapsed(const std::string& activityName, std::chrono::steady_clock::time_point startTime) {
+        auto endTime = std::chrono::steady_clock::now();
+        auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+        std::ostringstream oss;
+        oss << "Tiempo transcurrido en " << activityName << ": " << timeElapsed << " ms";
+        log(oss.str());
+    }
+
+
     void log(const std::string& message) {
         auto now = std::chrono::system_clock::now();
         auto now_time_t = std::chrono::system_clock::to_time_t(now);
@@ -149,12 +157,14 @@ class PasarelaDePagos
         void procesarTransaccion(Transaccion transaccion)
         {                
             logger.log("Transaccion: " + std::to_string(transaccion.id) + "::" + std::to_string(transaccion.monto)+ "::"+ transaccion.moneda+ " RECIBIDA");
-            
+            auto startTime = std::chrono::steady_clock::now();
             //Procesar la Transaccion
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            int secs = rand() % 4 + 2; // 2, 3, 4 o 5
+            std::this_thread::sleep_for(std::chrono::seconds(secs));
             std::cout<<"Procesando la transaccion: "<<transaccion.id<<std::endl;
             
             logger.log("Transaccion: " + std::to_string(transaccion.id) + " PROCESADA");
+            logger.logTimeElapsed("Tiempo de la Transaccion " + std::to_string(transaccion.id) , startTime);
             
         }
     private:
@@ -164,7 +174,11 @@ class PasarelaDePagos
 int main()
 {
     Logger logger("log_v2.txt");
+    auto startTime = std::chrono::steady_clock::now();
+    logger.log("---Inicio de Ejecucion de Transacciones---");
+
     ThreadPool pool(4); //Inicializar un threadpool con 4 threads
+    
 
     //Agregar tareas al threadpool
     /*
@@ -212,6 +226,11 @@ int main()
 
     std::cout<<"la execucion esta en proceso!"<<std::endl;
     //Detener el threadpool
+    
+
     pool.shutdown();
     std::cout<<"la execucion ha terminado!"<<std::endl;
+    logger.log("---Fin de Ejecucion de Transacciones---");
+    logger.logTimeElapsed("Procesamiento de Transacciones", startTime);
+    return 0;
 }
