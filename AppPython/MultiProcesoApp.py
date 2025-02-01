@@ -51,7 +51,9 @@ class ProcesadorPagos:
         with lock:
             print(Fore.CYAN + f"🕒 [{timestamp}] {process_name} - INICIO Procesando: {transaccion}")
 
-        time.sleep(random.uniform(1, 4))  # Simula tiempo de procesamiento
+        time.sleep(random.uniform(1, 4))  # Simula tiempo de procesamiento        
+        
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Timestamp actual
 
         transaccion.estado = "Completada"
         with lock:
@@ -74,7 +76,7 @@ class ProcesadorPagos:
 
 def main():
     """Ejecuta el procesamiento concurrente de transacciones bancarias."""
-    procesador_pagos = ProcesadorPagos(1)  # 4 Procesos de pago
+    procesador_pagos = ProcesadorPagos(4)  # 4 Procesos de pago
 
     start_time = time.time()  # Iniciar el cronómetro
 
