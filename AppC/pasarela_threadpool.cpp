@@ -177,6 +177,7 @@ int main()
 {
     Logger logger("log_v2.txt");
     auto startTime = std::chrono::steady_clock::now();
+    logger.log("---Inicio de Ejecucion de Transacciones---");
 
     ThreadPool pool(4); //Inicializar un threadpool con 4 threads
     
@@ -231,6 +232,7 @@ int main()
 
     pool.shutdown();
     std::cout<<"la execucion ha terminado!"<<std::endl;
+    logger.log("---Fin de Ejecucion de Transacciones---");
     logger.logTimeElapsed("Procesamiento de Transacciones", startTime);
     return 0;
 }
