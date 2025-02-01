@@ -21,18 +21,23 @@ class ProcesadorPagos:
         self.lock = manager.Lock()  # Shared lock across processes
 
     def recibir_Transaccion(self, transaccion):
-        # Crear un proceso para cada transaccion
-        
-        self.pool.apply_async(self.preparar_transaccion, args=(transaccion,))
+        # Crear un proceso para cada transaccion        
+        self.pool.apply_async(self.preparar_pedido, args=(transaccion, self.lock))
 
-        #proceso = multiprocessing.Process(target=self.preparar_pedido, args=(pedido,))
-        #procesos.append(proceso)
-        #proceso.start()
+    @staticmethod
+    def preparar_pedido(pedido, lock):
+        with lock:
+            print(f"Preparando: {pedido} - {multiprocessing.current_process().name}")
+        time.sleep(2)  # Simula el tiempo de preparación
+        with lock:
+            print(f"Pedido listo: {pedido} - {multiprocessing.current_process().name}")
+
+
 
     def preparar_transaccion(self, transaccion):
         with self.lock:
             print(f"Añadiendo al Pool: {transaccion.id} - {multiprocessing.current_process().name}")
-            time.sleep(random.randint(1, 5))  # Simula el tiempo de preparación
+            time.sleep(3)  # Simula el tiempo de preparación
             print(f"Pedido listo: {pedido} - {multiprocessing.current_process().name}")
 
 
