@@ -16,29 +16,22 @@ class Transaccion:
 class ProcesadorPagos:
     def __init__(self, num_concurrencia):
         self.num_concurrencia = num_concurrencia
+        self.manager = multiprocessing.Manager()
+        self.lock = self.manager.Lock()  # Use Manager to create a sharable lock
         self.pool = multiprocessing.Pool(processes=num_concurrencia)
-        manager = multiprocessing.Manager()
-        self.lock = manager.Lock()  # Shared lock across processes
+        
 
     def recibir_Transaccion(self, transaccion):
         # Crear un proceso para cada transaccion        
-        self.pool.apply_async(self.preparar_pedido, args=(transaccion, self.lock))
+        self.pool.apply_async(self.preparar_transaccion, args=(transaccion, self.lock))
+
 
     @staticmethod
-    def preparar_pedido(pedido, lock):
+    def preparar_transaccion(transaccion, lock):
+        print(f"Añadiendo al Pool: {transaccion.id} - {multiprocessing.current_process().name}")
         with lock:
-            print(f"Preparando: {pedido} - {multiprocessing.current_process().name}")
-        time.sleep(2)  # Simula el tiempo de preparación
-        with lock:
-            print(f"Pedido listo: {pedido} - {multiprocessing.current_process().name}")
-
-
-
-    def preparar_transaccion(self, transaccion):
-        with self.lock:
-            print(f"Añadiendo al Pool: {transaccion.id} - {multiprocessing.current_process().name}")
-            time.sleep(3)  # Simula el tiempo de preparación
-            print(f"Pedido listo: {pedido} - {multiprocessing.current_process().name}")
+            time.sleep(2)  # Simula el tiempo de preparación
+            print(f"Pedido listo: {transaccion.id} - {multiprocessing.current_process().name}")
 
 
             
@@ -46,7 +39,7 @@ class ProcesadorPagos:
 
 
 def main():
-    PaymentProcess = ProcesadorPagos(4)  # 4 Canales concurrentes
+    PaymentProcess = ProcesadorPagos(5)  # 4 Canales concurrentes
     numTransactions = 10
     procesos = []
 
@@ -55,15 +48,16 @@ def main():
 
     #for i in range(1, numTransactions + 1):
     #    pedido = f"Transacciones N:{i} "
-    PaymentProcess.recibir_Transaccion(Transaccion(1, 100.50, "USD"))
-    PaymentProcess.recibir_Transaccion(Transaccion(2, 600.25, "USD"))
-    PaymentProcess.recibir_Transaccion(Transaccion(3, 350.25, "USD"))
-    PaymentProcess.recibir_Transaccion(Transaccion(4, 268.34, "USD"))
-    PaymentProcess.recibir_Transaccion(Transaccion(5, 167.26, "USD"))
-    PaymentProcess.recibir_Transaccion(Transaccion(6, 149.50, "USD"))
-    PaymentProcess.recibir_Transaccion(Transaccion(7, 268.13, "USD"))
-    PaymentProcess.recibir_Transaccion(Transaccion(8, 245.20, "USD"))
-    PaymentProcess.recibir_Transaccion(Transaccion(9, 469.15, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion( 1, 100.50, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion( 2, 600.25, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion( 3, 350.25, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion( 4, 268.34, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion( 5, 167.26, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion( 6, 149.50, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion( 7, 268.13, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion( 8, 245.20, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion( 9, 469.15, "USD"))
+    PaymentProcess.recibir_Transaccion(Transaccion(10, 500.15, "USD"))
 
      # Asegurarse de que todos los procesos terminen antes de calcular el tiempo total
     #for proceso in procesos:
@@ -71,7 +65,7 @@ def main():
 
       # Properly close and join the pool before exiting
     PaymentProcess.pool.close()
-    #PaymentProcess.pool.join()
+    PaymentProcess.pool.join()
 
     
     # Asegurarse de que todos los procesos terminen antes de calcular el tiempo total
