@@ -11,6 +11,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <random>
 
 class ThreadPool
 {
@@ -158,8 +159,12 @@ class PasarelaDePagos
         {                
             logger.log("Transaccion: " + std::to_string(transaccion.id) + "::" + std::to_string(transaccion.monto)+ "::"+ transaccion.moneda+ " RECIBIDA");
             auto startTime = std::chrono::steady_clock::now();
-            //Procesar la Transaccion
-            int secs = rand() % 4 + 2; // 2, 3, 4 o 5
+            //Procesar la Transaccion            
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> dis(2, 5);
+            int secs = dis(gen);
+            //Sleep por un tiempo aleatorio de n secs
             std::this_thread::sleep_for(std::chrono::seconds(secs));
             std::cout<<"Procesando la transaccion: "<<transaccion.id<<std::endl;
             
@@ -216,7 +221,7 @@ int main()
     future7.get();
     future8.get();
     */
-    int nroTransacciones = 10;
+    int nroTransacciones = 9;
     for (int i = 0; i < nroTransacciones; i++)
     {
         Transaccion transaccion{i+1, 10.99, "USD"};
